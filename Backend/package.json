@@ -1,0 +1,19 @@
+{
+  "name": "dai-tp-integrador",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrunoGodoy07/DAI-TP-integrador.git"
+  },
+  "author": "Bruno Godoy, Tiziana Emma Mattioda, Mati Ezequiel Grzenda & Santino Aguilera",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BrunoGodoy07/DAI-TP-integrador/issues"
+  },
+  "homepage": "https://github.com/BrunoGodoy07/DAI-TP-integrador#readme"
+}
