@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/BrunoGodoy07/DAI-TP-integrador/issues"
   },
-  "homepage": "https://github.com/BrunoGodoy07/DAI-TP-integrador#readme"
+  "homepage": "https://github.com/BrunoGodoy07/DAI-TP-integrador#readme",
+  "dependencies": {
+    "dotenv": "^17.2.0"
+  }
 }
