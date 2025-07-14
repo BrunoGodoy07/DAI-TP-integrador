@@ -2,7 +2,7 @@ import eventRepository from '../repositories/province-repository.js';
 
 export default class ProvinceService {
   getAllAsync = async () => {
-    const repo = new EventRepository();
+    const repo = new eventRepository();
     const returnArray = await repo.getAllAsync();
     return returnArray;
   }
