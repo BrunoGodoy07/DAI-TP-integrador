@@ -2,8 +2,6 @@ import express from 'express';
 import cors from "cors";
 import eventRouter from "./src/controllers/eventController.js"
 
-const { Pool } = pkg;
-
 const app = express();
 const port = 3000;
 
