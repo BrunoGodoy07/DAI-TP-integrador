@@ -1,33 +1,16 @@
 import express from 'express';
-import 'dotenv/config'
-import pkg from 'pg';
+import cors from "cors";
+import eventRouter from "./src/controllers/eventController.js"
 
 const { Pool } = pkg;
 
 const app = express();
+const port = 3000;
 
-const DBConfig = {
-    host        : process.env.DB_HOST     ?? '',
-    database    : process.env.DB_DATABASE ?? '',
-    user        : process.env.DB_USER     ?? '',
-    password    : process.env.DB_PASSWORD ?? '',
-    port        : process.env.DB_PORT     ?? 5432
-}
+app.use(cors());
+app.use(express.json());
+app.use('/api/event', eventRouter)
 
-export default DBConfig;
-/* Checkear bien esto, no tengo el mental para pensar bien como debería de conectarse.
-app.get('/api/event/?name=' + texto, (req, res) => {
-    res.send('Hola mundo');
-});
-
-app.get('/api/event/?startdate=' + fecha, (req, res) => {
-    res.send('Hola mundo');
-});
-
-app.get('/api/event/?tag=' + texto, (req, res) => {
-    res.send('Hola mundo');
-});
-*/
-app.listen(3000, () => {
+app.listen(port, () => {
     console.log('Servidor escuchando en puerto 3000');
 });
