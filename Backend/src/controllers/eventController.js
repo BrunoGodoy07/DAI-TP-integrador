@@ -14,13 +14,13 @@ router.get('', async (req, res) => {
     return response;
 });
 
-export default router;
-/*
-export const getEvents = async (req, res) => {
+router.post('', async (req, res) => {
+    try {
+        const inserted = await svc.createEvent(req.body.insertContents);
+        res.status(200).json({ success: true, inserted });
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.message });
+    }
+})
 
-}
-app.get('', (req, res) => {
-    const sql = `
-    `
-    res.send()
-})*/
+export default router;
