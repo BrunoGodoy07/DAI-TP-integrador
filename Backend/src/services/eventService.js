@@ -13,11 +13,13 @@ export default class eventService {
   }
 
   searchEvents = async (filters) => {
-    return await repo.searchEvents(filters);
+    const returnArray = await repo.searchEvents(filters);
+    return returnArray;
   }
 
   getById = async (id) => {
-    return await repo.getById(id);
+    const returnArray = await await repo.getById(id);
+    return returnArray;
   }
   
 }

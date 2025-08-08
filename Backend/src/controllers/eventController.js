@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import eventService from './../services/eventService.js';
-import authMiddleware from '../middlewares/authMiddleware.js'; // Importar el middleware
+import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = Router();
 const svc = new eventService();
 
-// 🔓 Ruta pública - búsqueda de eventos
 router.get('', async (req, res) => {
     try {
         const { name, startdate, tag } = req.query;
@@ -17,7 +16,6 @@ router.get('', async (req, res) => {
     }
 });
 
-// 🔒 Ruta protegida - ver detalle de evento
 router.get('/:id', authMiddleware, async (req, res) => {
     try {
         const event = await svc.getById(parseInt(req.params.id));
@@ -31,7 +29,6 @@ router.get('/:id', authMiddleware, async (req, res) => {
     }
 });
 
-// 🔒 Ruta protegida - crear evento
 router.post('', authMiddleware, async (req, res) => {
     try {
         const inserted = await svc.createEvent(req.body.insertContents);
