@@ -268,4 +268,22 @@ export default class eventRepository {
             throw err;
         }
     }
+    enrollUser = async (id) =>
+    {
+        try {
+            await client.connect();
+            const sql = `
+                SELECT *
+                FROM events
+                WHERE id = ${id}
+            `
+            const event = await client.query(sql, [id]);
+            
+            //if (event.max_assistance) hacer innerjoin o ver que clase de brujería hacer para encontrar la cantidad de registrados al evento.
+        }
+        catch (err) {
+            console.error(err);
+            throw err;
+        }
+    }
 }
