@@ -38,7 +38,7 @@ router.post('', authMiddleware, async (req, res) => {
     }
 });
 
-/*router.post('/:id/enrollment/', authMiddleware, async (req, res) => {
+router.post('/:id/enrollment/', authMiddleware, async (req, res) => {
     if (!req.params.id)
     {
         res.status(404).send("Id no encontrada.")
@@ -46,9 +46,10 @@ router.post('', authMiddleware, async (req, res) => {
 
     try {
         const inserted = await svc.enrollUser(parseInt(req.params.id));
+        //ver de agregar las diferentes posibilidades de error.
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
-})*/
+})
 
 export default router;
