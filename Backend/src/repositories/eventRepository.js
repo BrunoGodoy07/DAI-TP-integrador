@@ -80,6 +80,7 @@ export default class eventRepository {
 
             const result = await client.query(sql);
             returnArray = result.rows;
+            await client.end();
 
             if (result.rowCount === 0) {    
                 throw new Error(`No data was inserted: '${insertContents}'`);
@@ -112,13 +113,9 @@ export default class eventRepository {
             console.error('Error in createEvent:', error.message);
             throw error;
         }
-        
-        finally {
-            await client.end();
-        }
     }
 
-    searchEvents = async ({ name, startdate, tag }) => {
+    searchEvents = async ({ name, startdate }) => {
         const client = new Client(DBConfig);
         let filters = [];
         let values = [];
@@ -131,11 +128,6 @@ export default class eventRepository {
         if (startdate) {
             filters.push(`e.start_date = $${idx++}`);
             values.push(startdate);
-        }
-        if (tag) {
-            // Asumiendo que tienes una columna 'tags' en events o en otra tabla relacionada
-            filters.push(`LOWER(e.description) LIKE LOWER($${idx++})`);
-            values.push(`%${tag}%`);
         }
     
         let whereClause = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
@@ -190,12 +182,11 @@ export default class eventRepository {
         try {
             await client.connect();
             const result = await client.query(sql, values);
+            await client.end();
             return result.rows;
         } catch (err) {
             console.error(err);
             throw err;
-        } finally {
-            await client.end();
         }
     }
     getById = async (id) => {
@@ -275,9 +266,6 @@ export default class eventRepository {
         } catch (err) {
             console.error(err);
             throw err;
-        } finally {
-            await client.end();
         }
     }
-    
 }

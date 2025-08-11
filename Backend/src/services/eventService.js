@@ -18,7 +18,7 @@ export default class eventService {
   }
 
   getById = async (id) => {
-    const returnArray = await await repo.getById(id);
+    const returnArray = await repo.getById(id);
     return returnArray;
   }
   
