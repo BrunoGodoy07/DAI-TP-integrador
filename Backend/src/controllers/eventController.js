@@ -7,8 +7,8 @@ const svc = new eventService();
 
 router.get('', async (req, res) => {
     try {
-        const { name, startdate, tag } = req.query;
-        const events = await svc.searchEvents({ name, startdate, tag });
+        const { name, startdate } = req.query;
+        const events = await svc.searchEvents({ name, startdate });
         res.status(200).json(events);
     } catch (err) {
         console.error(err);
@@ -16,7 +16,7 @@ router.get('', async (req, res) => {
     }
 });
 
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
         const event = await svc.getById(parseInt(req.params.id));
         if (!event) {
