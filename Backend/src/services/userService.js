@@ -1,11 +1,13 @@
-import repo from '../repositories/userRepository.js';
+import userRepository from '../repositories/userRepository.js';
+const repo = new userRepository();
 
-findByUsername = async (username) => {
-    return await repo.findByUsername(username);
+export default class UserService {
+    findByUsername = async (username) => {
+        const returnArray = await repo.findByUsername(username);
+        return returnArray;
+    }
+    createUser = async (user) => {
+        const returnArray = await repo.createUser(user);
+        return returnArray;
+    }
 }
-
-createUser = async (user) => {
-    return await repo.createUser(user);
-}
-
-export default { findByUsername, createUser };

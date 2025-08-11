@@ -1,12 +1,12 @@
 import { Router } from 'express';
+import userService from './../services/userService.js';
 import jwt from 'jsonwebtoken';
 
 const router = Router();
-
-const users = []; // Temporal, reemplazar con base de datos real
+const svc = new userService();
 
 // Registro
-router.post('/register', (req, res) => {
+router.post('/register', async(req, res) => {
     const { first_name, last_name, username, password } = req.body;
 
     // Validaciones simples
@@ -21,14 +21,17 @@ router.post('/register', (req, res) => {
         return res.status(400).json({ success: false, message: "La contraseña debe tener al menos 3 caracteres." });
     }
 
-    users.push({ first_name, last_name, username, password });
+    await svc.createUser({first_name, last_name, username, password})
     return res.status(201).json({ success: true, message: "Usuario registrado correctamente." });
 });
 
 // Login
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { username, password } = req.body;
-    const user = users.find(u => u.username === username && u.password === password);
+    const user = await svc.findByUsername(username)
+    if (!user.password === password) {
+        return res.status(401).json({ success: false, message: "La clave es invalida.", token: "" });
+    } 
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) {
         return res.status(400).json({ success: false, message: "El email es invalido.", token: "" });
@@ -44,7 +47,7 @@ router.post('/login', (req, res) => {
         { expiresIn: "1h" }
     );
 
-    return res.status(200).json({ success: true, message: "", token });
+    return res.status(200).json({ success: true, message: "", token, id });
 });
 
 export default router;
