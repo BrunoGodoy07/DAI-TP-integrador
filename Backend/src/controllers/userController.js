@@ -41,7 +41,7 @@ router.post('/login', async (req, res) => {
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
     );
-    return res.status(200).json({ success: true, message: "Inicio de sesión correcto.", token });
+    return res.status(200).json({ success: true, message: "Inicio de sesión correcto.", token, user: user.id });
 });
 
 export default router;
