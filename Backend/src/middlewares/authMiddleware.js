@@ -4,7 +4,7 @@ export default function authMiddleware(req, res, next) {
     const authHeader = req.headers['authorization'];
 
     if (!authHeader) {
-        return res.status(403).json({
+        return res.status(401).json({
             success: false,
             message: 'Acceso denegado. Token no proporcionado.'
         });
@@ -15,7 +15,7 @@ export default function authMiddleware(req, res, next) {
         req.user = decoded;
         next();
     } catch (err) {
-        return res.status(401).json({
+        return res.status(403).json({
             success: false,
             message: 'Token inválido o expirado.'
         });

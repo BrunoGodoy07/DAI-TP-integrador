@@ -22,4 +22,8 @@ export default class eventService {
     return returnArray;
   }
   
+  enrollUser = async (id) => {
+    const returnArray = await repo.enrollUser(id)
+    return returnArray;
+  }
 }
