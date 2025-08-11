@@ -9,6 +9,8 @@ export default class eventRepository {
         try {
             const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
             return result.rows[0] || null;
+        } catch (err) {
+            console.error("error:" + err)
         } finally {
             await client.end();
         }
@@ -23,7 +25,7 @@ export default class eventRepository {
                 [first_name, last_name, username, password]
             );
         } catch (err) {
-
+            console.error("error:" + err)
         } finally {
             await client.end();
         }
