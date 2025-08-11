@@ -13,11 +13,12 @@ router.post('/register', async(req, res) => {
     if (!first_name || first_name.length < 3 || !last_name || last_name.length < 3) {
         return res.status(400).json({ success: false, message: "Nombre y apellido deben tener al menos 3 letras." });
     }
-    if (!username || username.length < 3) {
-        return res.status(400).json({ success: false, message: "El usuario debe tener al menos 3 letras." });
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(username)) {
+        return res.status(400).json({ success: false, message: "El email es invalido." });
     }
-    if (!password || password.length < 8) {
-        return res.status(400).json({ success: false, message: "La contraseña debe tener al menos 8 caracteres." });
+    if (!password || password.length < 3) {
+        return res.status(400).json({ success: false, message: "La contraseña debe tener al menos 3 caracteres." });
     }
 
     await svc.createUser({first_name, last_name, username, password})
@@ -33,7 +34,11 @@ router.post('/login', async (req, res) => {
     } 
 
     if (!user) {
-        return res.status(401).json({ success: false, message: "Usuario o clave inválida.", token: "" });
+        return res.status(401).json({ success: false, message: "El usuario ingresado no existe.", token: "" });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) {
+        return res.status(400).json({ success: false, message: "El email es invalido.", token: "" });
     }
 
     const token = jwt.sign(
@@ -41,7 +46,7 @@ router.post('/login', async (req, res) => {
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
     );
-    return res.status(200).json({ success: true, message: "Inicio de sesión correcto.", token, user: user.id });
+    return res.status(200).json({ success: true, message: "Inicio de sesión correcto.", token });
 });
 
 export default router;

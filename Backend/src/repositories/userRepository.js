@@ -6,8 +6,8 @@ export default class eventRepository {
     findByUsername = async (username) => {
         const client = new Client(DBConfig);
         try {
-            const result = await
-            await client.connect(); client.query('SELECT * FROM users WHERE username = $1', [username]);
+            await client.connect();
+            const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
             await client.end();
             return result.rows[0] || null;
         } catch (err) {

@@ -62,7 +62,7 @@ export default class eventRepository {
         return returnArray;
     }
 
-    createEvent = async (insertContents) => {
+    createEvent = async (insertContents) => { //ARREGLAR. Nota: eliminar la tabla de Users y la de Events, volviendo a poner los mismos datos.
         const client = new Client(DBConfig);
         try {
             if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(insertContents)) {
