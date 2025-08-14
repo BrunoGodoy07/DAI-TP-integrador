@@ -272,14 +272,36 @@ export default class eventRepository {
     {
         try {
             await client.connect();
-            const sql = `
+            const eventQuery = `
                 SELECT *
                 FROM events
                 WHERE id = ${id}
             `
-            const event = await client.query(sql, [id]);
-            
-            //if (event.max_assistance) hacer innerjoin o ver que clase de brujería hacer para encontrar la cantidad de registrados al evento.
+            const event = await client.query(eventQuery, [id]);
+
+            if (eventResult.rows.length === 0) {
+                // Ver como clavar el error(`Event with id: ${id} not found.`);
+            }
+
+            if (event.enabled_for_enrollment)
+            {
+                sql = `
+                    SELECT *
+                    FROM event_enrollments
+                    WHERE id_event = ${id}
+                `
+
+                const enrolledUsers = await client.query(sql, [id])
+
+                if (enrolledUsers.rows.length >= event.max_assistance)
+                {
+                    sql = `
+                    UPDATE events
+                    SET [enabled_for_enrollment] = true
+                    WHERE id = ${id}
+                    `
+                }
+            }
         }
         catch (err) {
             console.error(err);
