@@ -268,44 +268,64 @@ export default class eventRepository {
             throw err;
         }
     }
-    enrollUser = async (id) =>
+    enrollUser = async (id, authHeader) =>
     {
         try {
+            if (!authHeader) throw new Error("Authorization header missing");
+            const token = authHeader.split(' ')[1];
+            if (!token) throw new Error("Token missing");
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user_id = decoded.user_id;
             await client.connect();
             const eventQuery = `
                 SELECT *
                 FROM events
-                WHERE id = ${id}
+                WHERE id = $1
             `
-            const event = await client.query(eventQuery, [id]);
+            const eventResult = await client.query(eventQuery, [id]);
 
             if (eventResult.rows.length === 0) {
-                // Ver como clavar el error(`Event with id: ${id} not found.`);
+                throw new Error(`Event with id: ${id} not found.`);
             }
 
-            if (event.enabled_for_enrollment)
+            if (eventResult.rows[0].enabled_for_enrollment)
             {
-                sql = `
-                    SELECT *
-                    FROM event_enrollments
-                    WHERE id_event = ${id}
+                const dateTime = new Date();
+                const enrollmentUserQuery = `
+                    INSERT INTO event_enrollments (id_event, id_user, registration_date_time)
+                    values ($1, $2, $3)
                 `
 
-                const enrolledUsers = await client.query(sql, [id])
+                await client.query(enrollmentUserQuery, [id, user_id, dateTime])
+                const enrollmentCountQuery = `
+                    SELECT COUNT(*)
+                    FROM event_enrollments
+                    WHERE id_event = $1
+                `
 
-                if (enrolledUsers.rows.length >= event.max_assistance)
+                const enrolledUsers = await client.query(enrollmentCountQuery, [id])
+
+                const enrolledCount = parseInt(enrolledUsers.rows[0].count, 10);
+
+                if (enrolledCount >= eventResult.rows[0].max_assistance)
                 {
-                    sql = `
+                    const updateQuery = `
                     UPDATE events
-                    SET [enabled_for_enrollment] = true
-                    WHERE id = ${id}
+                    SET enabled_for_enrollment = false
+                    WHERE id = $1
                     `
+
+                    await client.query(updateQuery, [id])
                 }
             }
         }
         catch (err) {
             console.error(err);
             throw err;
+        }
+
+        finally {
+            await client.end();
         }
     }
 }
