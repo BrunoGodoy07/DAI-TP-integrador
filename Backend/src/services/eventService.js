@@ -7,8 +7,28 @@ export default class eventService {
     return returnArray;
   }
 
+  getCapacity = async (id) => {
+    const returnArray = await repo.getCapacity(id);
+    return returnArray;
+  }
+
+  getCreator = async (id) => {
+    const returnArray = await repo.getCreator(id);
+    return returnArray;
+  }
+
   createEvent = async (insertContents) => {
     const returnArray = await repo.createEvent(insertContents);
+    return returnArray;
+  }
+
+  updateEvent = async (insertContents, id) => {
+    const returnArray = await repo.updateEvent(insertContents, id);
+    return returnArray;
+  }
+  
+  deleteEvent = async (id) => {
+    const returnArray = await repo.deleteEvent(id);
     return returnArray;
   }
 

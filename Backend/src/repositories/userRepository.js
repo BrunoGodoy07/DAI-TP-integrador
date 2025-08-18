@@ -2,7 +2,7 @@ import pkg from 'pg';
 const { Client } = pkg;
 import DBConfig from '../configs/DBConfig.js';
 
-export default class eventRepository {
+export default class userRepository {
     findByUsername = async (username) => {
         const client = new Client(DBConfig);
         try {

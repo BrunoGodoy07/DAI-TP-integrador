@@ -29,14 +29,13 @@ router.post('/register', async(req, res) => {
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await svc.findByUsername(username)
-    if (!user.password === password) {
-        return res.status(401).json({ success: false, message: "La clave es invalida.", token: "" });
-    } 
 
     if (!user) {
         return res.status(401).json({ success: false, message: "El usuario ingresado no existe.", token: "" });
     }
-
+    if (!user.password === password) {
+        return res.status(401).json({ success: false, message: "La clave es invalida.", token: "" });
+    } 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) {
         return res.status(400).json({ success: false, message: "El email es invalido.", token: "" });
     }

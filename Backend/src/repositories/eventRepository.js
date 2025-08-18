@@ -57,60 +57,99 @@ export default class eventRepository {
             await client.end();
             returnArray = result.rows;
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
         return returnArray;
     }
 
-    createEvent = async (insertContents) => { //ARREGLAR. Nota: eliminar la tabla de Users y la de Events, volviendo a poner los mismos datos.
+    getCapacity = async (id) => {
+        let returnArray = null;
         const client = new Client(DBConfig);
         try {
-            if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(insertContents)) {
-                throw new Error(`Invalid table name: '${insertContents}'`);
-            }
-            
+            await client.connect();
             const sql = `
-                INSERT INTO events (name, description, start_date, duration_in_minutes, price, enabled_for_enrollment, max_assistance)
-                SELECT name, description, start_date, duration_in_minutes, price, enabled_for_enrollment, max_assistance
-                FROM ${insertContents}
-                RETURNING *;
+                SELECT max_capacity FROM event_locations WHERE id = ${id}
+            `;
+            const result = await client.query(sql);
+            await client.end();
+            returnArray = result.rows;
+        } catch (error) {
+            console.error(error);
+        }
+        return returnArray;
+    }
+
+    getCreator = async (id) => {
+        let returnArray = null;
+        const client = new Client(DBConfig);
+        try {
+            await client.connect();
+            const sql = `
+                SELECT id_creator_user FROM events WHERE id = ${id}
+            `;
+            const result = await client.query(sql);
+            await client.end();
+            returnArray = result.rows;
+        } catch (error) {
+            console.error(error);
+        }
+        return returnArray;
+    }
+
+    createEvent = async (i) => {
+        const client = new Client(DBConfig);
+        try {
+            const sql = `
+                INSERT INTO events (name, description, id_event_location, start_date, duration_in_minutes, price, enabled_for_enrollment, max_assistance, id_creator_user)
+                VALUES (${i.name}, ${i.description}, ${i.id_event_location}, ${i.start_date}, ${i.duration_in_minutes}, ${i.price}, ${i.enabled_for_enrollment}, ${i.max_assistance}, ${i.id_creator_user})
             `
 
             await client.connect();
-
-            const result = await client.query(sql);
-            returnArray = result.rows;
+            await client.query(sql);
             await client.end();
-
-            if (result.rowCount === 0) {    
-                throw new Error(`No data was inserted: '${insertContents}'`);
-            }
-
-            result.rows.forEach((event) => {
-                if (event.name.length < 3) {
-                    throw new Error(`The name of the event '${event.name}' must be longer than 3 characters.`);
-                }
-
-                if (event.description.length < 3) {
-                    throw new Error(`The description of the event '${event.name}' must be longer than 3 characters.`);
-                }
-                
-                if (event.max_assistance > event.max_capacity) {
-                    throw new Error(`The maximum assistance of the event '${event.name}' CANNOT be greater than the maximum capacity of the event.`);
-                }
-                
-                if (event.price < 0) {
-                    throw new Error(`The price of the event '${event.name}' cannot be lower than 0.`);
-                }
-                
-                if (event.duration_in_minutes < 0) {
-                    throw new Error(`The duration of the event '${event.name}' cannot be lower than 0.`);
-                }
-            });
         }
 
         catch (error) {
-            console.error('Error in createEvent:', error.message);
+            console.error(error);
+            throw error;
+        }
+    }
+
+    updateEvent = async (i, id) => {
+        const client = new Client(DBConfig);
+        try {
+            const sql = `
+                UPDATE events
+                SET name = ${i.name}, description = ${i.description}, id_event_location = ${i.id_event_location}, start_date = ${i.start_date}, duration_in_minutes = ${i.duration_in_minutes}, price = ${i.price}, enabled_for_enrollment = ${i.enabled_for_enrollment}, max_assistance = ${i.max_assistance}
+                WHERE id = ${id}
+            `
+
+            await client.connect();
+            await client.query(sql);
+            await client.end();
+        }
+
+        catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
+    
+    deleteEvent = async (id) => {
+        const client = new Client(DBConfig);
+        try {
+            const sql = `
+                DELETE FROM events
+                WHERE id = ${id}
+            `
+
+            await client.connect();
+            await client.query(sql);
+            await client.end();
+        }
+
+        catch (error) {
+            console.error(error);
             throw error;
         }
     }

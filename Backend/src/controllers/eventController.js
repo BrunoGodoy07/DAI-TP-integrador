@@ -31,8 +31,43 @@ router.get('/:id', async (req, res) => {
 
 router.post('', authMiddleware, async (req, res) => {
     try {
-        const inserted = await svc.createEvent(req.body.insertContents);
-        res.status(200).json({ success: true, inserted });
+        let insertContents = req.body;
+        insertContents.creator_user = req.user.id;
+        const max_capacity = await svc.getCapacity(insertContents.id_event_location);
+        if(insertContents.name < 3 || insertContents.description < 3) throw new Error("El nombre y la descripción tienen que tener más de 3 letras.");
+        else if(insertContents.max_assistance > max_capacity) throw new Error("La asistencia máxima no puede ser mayor a la capacidad de la ubicación.");
+        else if(insertContents.price < 0 || insertContents.duration_in_minutes < 0) throw new Error("El precio o la duración no pueden ser negativos.");
+        const inserted = await svc.createEvent(insertContents);
+        res.status(201).json({ success: true, inserted });
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.message });
+    }
+});
+
+router.put('/:id', authMiddleware, async (req, res) => {
+    try {
+        let insertContents = req.body;
+        const id = parseInt(req.params.id);
+        const creatorUser = svc.getCreator(id); //Acá ya tira error si el evento no existe
+        if(creatorUser != req.user.id) throw new Error("Acceso no autorizado.");
+        const max_capacity = await svc.getCapacity(insertContents.id_event_location);
+        if(insertContents.name < 3 || insertContents.description < 3) throw new Error("El nombre y la descripción tienen que tener más de 3 letras.");
+        else if(insertContents.max_assistance > max_capacity) throw new Error("La asistencia máxima no puede ser mayor a la capacidad de la ubicación.");
+        else if(insertContents.price < 0 || insertContents.duration_in_minutes < 0) throw new Error("El precio o la duración no pueden ser negativos.");
+        const inserted = await svc.updateEvent(insertContents, id);
+        res.status(201).json({ success: true, inserted });
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.message });
+    }
+});
+
+router.delete('/:id', authMiddleware, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const creatorUser = svc.getCreator(id); //Acá ya tira error si el evento no existe
+        if(creatorUser != req.user.id) throw new Error("Acceso no autorizado.");
+        const inserted = await svc.deleteEvent(id); //Si existe una foreign key (o sea, un usuario registrado al evento) tira error acá
+        res.status(201).json({ success: true, inserted });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
