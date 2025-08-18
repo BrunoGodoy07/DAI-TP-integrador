@@ -9,7 +9,6 @@ const svc = new userService();
 router.post('/register', async(req, res) => {
     const { first_name, last_name, username, password } = req.body;
 
-    // Validaciones simples
     if (!first_name || first_name.length < 3 || !last_name || last_name.length < 3) {
         return res.status(400).json({ success: false, message: "Nombre y apellido deben tener al menos 3 letras." });
     }
