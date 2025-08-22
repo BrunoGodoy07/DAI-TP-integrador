@@ -1,150 +1,476 @@
 {
 	"info": {
-		"_postman_id": "eee01b73-b775-420a-8205-22e755a8ebe2",
-		"name": "DAI TP integrador",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	  "_postman_id": "eee01b73-b775-420a-8205-22e755a8ebe2",
+	  "name": "DAI TP integrador",
+	  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
+	"variable": [
+	  {
+		"key": "baseUrl",
+		"value": "http://localhost:3000"
+	  },
+	  {
+		"key": "jwt",
+		"value": ""
+	  }
+	],
 	"item": [
-		{
-			"name": "Events",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:3000/api/event",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"api",
-						"event"
-					]
-				}
-			},
-			"response": []
+	  {
+		"name": "Events - List",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{baseUrl}}/api/event",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event"
+			]
+		  }
 		},
-		{
-			"name": "Event Detail",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:3000/api/event/2",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"api",
-						"event",
-						"2"
-					]
-				}
-			},
-			"response": []
+		"response": []
+	  },
+	  {
+		"name": "Events - Filter (by name & startdate)",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{baseUrl}}/api/event?name=Taylor&startdate=2024-03-21",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event"
+			],
+			"query": [
+			  {
+				"key": "name",
+				"value": "Taylor"
+			  },
+			  {
+				"key": "startdate",
+				"value": "2024-03-21"
+			  }
+			]
+		  }
 		},
-		{
-			"name": "Events (filter)",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "localhost:3000/api/event/1",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"api",
-						"event",
-						"1"
-					]
-				}
-			},
-			"response": []
+		"response": []
+	  },
+	  {
+		"name": "Event Detail",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{baseUrl}}/api/event/2",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event",
+			  "2"
+			]
+		  }
 		},
-		{
-			"name": "Register",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"first_name\": \"Tiziana\",\r\n    \"last_name\": \"Mattioda\",\r\n    \"username\": \"tizianaemattioda\",\r\n    \"password\": \"pansexual0\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:3000/api/user/register",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"api",
-						"user",
-						"register"
-					]
-				}
+		"response": []
+	  },
+	  {
+		"name": "Event - Create",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Content-Type",
+			  "value": "application/json"
 			},
-			"response": []
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"name\": \"Concierto Demo\",\n  \"description\": \"Evento de prueba\",\n  \"id_event_location\": 1,\n  \"start_date\": \"2025-09-01\",\n  \"duration_in_minutes\": 120,\n  \"price\": 1000,\n  \"enabled_for_enrollment\": 1,\n  \"max_assistance\": 5000,\n  \"id_creator_user\": 1\n}"
+		  },
+		  "url": {
+			"raw": "{{baseUrl}}/api/event",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event"
+			]
+		  }
 		},
-		{
-			"name": "Login",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"Jschiffer\",\r\n    \"password\": \"julian1234\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "localhost:3000/api/user/login",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"api",
-						"user",
-						"login"
-					]
-				}
+		"response": []
+	  },
+	  {
+		"name": "Event - Enroll user",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": ""
+		  },
+		  "url": {
+			"raw": "{{baseUrl}}/api/event/1/enrollment",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event",
+			  "1",
+			  "enrollment"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Register",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Content-Type",
+			  "value": "application/json"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"first_name\": \"Tiziana\",\n  \"last_name\": \"Mattioda\",\n  \"username\": \"tizianaemattioda@example.com\",\n  \"password\": \"contraseña\"\n}"
+		  },
+		  "url": {
+			"raw": "{{baseUrl}}/api/user/register",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "user",
+			  "register"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Login (save token)",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Content-Type",
+			  "value": "application/json"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"username\": \"Jschiffer\",\n  \"password\": \"julian1234\"\n}"
+		  },
+		  "url": {
+			"raw": "{{baseUrl}}/api/user/login",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "user",
+			  "login"
+			]
+		  }
+		},
+		"event": [
+		  {
+			"listen": "test",
+			"script": {
+			  "type": "text/javascript",
+			  "exec": [
+				"if (pm.response.code === 200) {",
+				"  try {",
+				"    const json = pm.response.json();",
+				"    const token = json.token || (json.data && json.data.token) || json.accessToken;",
+				"    if (token) {",
+				"      pm.environment.set('jwt', token);",
+				"      pm.test('Token saved to environment', true);",
+				"    } else {",
+				"      pm.test('No token found in response', false);",
+				"    }",
+				"  } catch (e) {",
+				"    pm.test('Response not JSON', false);",
+				"  }",
+				"}"
+			  ]
+			}
+		  }
+		],
+		"response": []
+	  },
+	  {
+		"name": "Event-location - List (paginated)",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{baseUrl}}/api/event-location?page=1&limit=10",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event-location"
+			],
+			"query": [
+			  {
+				"key": "page",
+				"value": "1"
+			  },
+			  {
+				"key": "limit",
+				"value": "10"
+			  }
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Event-location - Get by id",
+		"request": {
+		  "method": "GET",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{baseUrl}}/api/event-location/1",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event-location",
+			  "1"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Event-location - Create",
+		"request": {
+		  "method": "POST",
+		  "header": [
+			{
+			  "key": "Content-Type",
+			  "value": "application/json"
 			},
-			"response": []
-		}
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"id_location\": 1,\n  \"name\": \"Club Atlético River Plate\",\n  \"full_address\": \"Av. Pres. Figueroa Alcorta 7597\",\n  \"max_capacity\": 84567,\n  \"latitude\": -35,\n  \"longitude\": -58\n}"
+		  },
+		  "url": {
+			"raw": "{{baseUrl}}/api/event-location",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event-location"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Event-location - Update (PUT)",
+		"request": {
+		  "method": "PUT",
+		  "header": [
+			{
+			  "key": "Content-Type",
+			  "value": "application/json"
+			},
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"name\": \"Nuevo Nombre del Lugar\",\n  \"max_capacity\": 90000\n}"
+		  },
+		  "url": {
+			"raw": "{{baseUrl}}/api/event-location/1",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event-location",
+			  "1"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Event-location - Delete",
+		"request": {
+		  "method": "DELETE",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{baseUrl}}/api/event-location/1",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event-location",
+			  "1"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Event - Update (PUT)",
+		"request": {
+		  "method": "PUT",
+		  "header": [
+			{
+			  "key": "Content-Type",
+			  "value": "application/json"
+			},
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "body": {
+			"mode": "raw",
+			"raw": "{\n  \"id\": 1,\n  \"name\": \"Concierto Demo Actualizado\",\n  \"description\": \"Descripción actualizada del evento\",\n  \"id_event_location\": 1,\n  \"start_date\": \"2025-09-02\",\n  \"duration_in_minutes\": 140,\n  \"price\": 1200,\n  \"enabled_for_enrollment\": 1,\n  \"max_assistance\": 4500,\n  \"id_creator_user\": 1\n}"
+		  },
+		  "url": {
+			"raw": "{{baseUrl}}/api/event",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Event - Delete",
+		"request": {
+		  "method": "DELETE",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{baseUrl}}/api/event/1",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event",
+			  "1"
+			]
+		  }
+		},
+		"response": []
+	  },
+	  {
+		"name": "Event - Delete Enrollment (remove authenticated user from event)",
+		"request": {
+		  "method": "DELETE",
+		  "header": [
+			{
+			  "key": "Authorization",
+			  "value": "Bearer {{jwt}}",
+			  "type": "text"
+			}
+		  ],
+		  "url": {
+			"raw": "{{baseUrl}}/api/event/1/enrollment",
+			"host": [
+			  "{{baseUrl}}"
+			],
+			"path": [
+			  "api",
+			  "event",
+			  "1",
+			  "enrollment"
+			]
+		  }
+		},
+		"response": []
+	  }
 	]
-}
+  }
