@@ -1,15 +1,31 @@
 import React from 'react';
-import { TextInput } from 'react-native-paper';
+import { Button } from 'react-native-paper';
+import theme from '../utils/theme';
 
-const CustomInput = ({ label, value, onChangeText, ...props }) => (
-  <TextInput
-    label={label}
-    value={value}
-    onChangeText={onChangeText}
-    mode="outlined"
-    style={{ marginBottom: 12 }}
+const CustomButton = ({ onPress, children, mode = "contained", style, textColor, ...props }) => (
+  <Button
+    mode={mode}
+    onPress={onPress}
+    style={[styles.button, style]}
+    textColor={textColor || (mode === "contained" ? theme.colors.text : theme.colors.primary)}
+    theme={{
+      colors: {
+        primary: theme.colors.primary,
+        onPrimary: theme.colors.text,
+        surface: theme.colors.surface,
+        onSurface: theme.colors.text,
+      },
+    }}
     {...props}
-  />
+  >
+    {children}
+  </Button>
 );
 
-export default CustomInput;
+const styles = {
+  button: {
+    marginBottom: 12,
+  },
+};
+
+export default CustomButton;

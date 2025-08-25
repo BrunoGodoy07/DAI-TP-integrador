@@ -1,29 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl, Alert } from 'react-native';
-import { Searchbar, FAB, Text, Surface, Card, Title, Paragraph, Button, Chip } from 'react-native-paper';
-import { getAllEvents, searchEvents, enrollInEvent } from '../utils/events';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
+import { Text, Surface, Card, Title, Paragraph, Button, FAB, Chip } from 'react-native-paper';
+import { getAllEvents, deleteEvent } from '../utils/events';
 import { isAuthenticated } from '../utils/auth';
 import theme from '../utils/theme';
 
-const EventListScreen = ({ navigation }) => {
+const MyEventsScreen = ({ navigation }) => {
   const [events, setEvents] = useState([]);
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchEvents = async (query = '') => {
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigation.replace('Login');
+      return;
+    }
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
     try {
       setLoading(true);
-      let response;
-      
-      if (query.trim()) {
-        // Buscar eventos con filtros
-        response = await searchEvents({ name: query });
-      } else {
-        // Obtener todos los eventos
-        response = await getAllEvents(1, 50);
-      }
-      
+      const response = await getAllEvents(1, 100); // Cargar todos los eventos
+      // Filtrar solo los eventos del usuario actual (esto se haría en el backend)
       setEvents(response.data || []);
     } catch (error) {
       Alert.alert('Error', 'No se pudieron cargar los eventos');
@@ -34,27 +33,39 @@ const EventListScreen = ({ navigation }) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchEvents(search);
+    await loadEvents();
     setRefreshing(false);
   };
 
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      navigation.replace('Login');
-      return;
-    }
-    fetchEvents();
-  }, []);
+  const handleEditEvent = (event) => {
+    navigation.navigate('EventForm', { event, isEditing: true });
+  };
 
-  const handleEnroll = async (event) => {
-    try {
-      await enrollInEvent(event.id);
-      Alert.alert('Éxito', 'Te has inscrito al evento correctamente');
-      // Recargar eventos para actualizar el estado
-      fetchEvents(search);
-    } catch (error) {
-      Alert.alert('Error', error.message || 'No se pudo inscribir al evento');
-    }
+  const handleDeleteEvent = (event) => {
+    Alert.alert(
+      'Confirmar eliminación',
+      `¿Estás seguro de que quieres eliminar el evento "${event.name}"?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteEvent(event.id);
+              Alert.alert('Éxito', 'Evento eliminado correctamente');
+              loadEvents();
+            } catch (error) {
+              Alert.alert('Error', error.message || 'No se pudo eliminar el evento');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleViewParticipants = (event) => {
+    navigation.navigate('Participants', { eventId: event.id });
   };
 
   const formatDate = (dateString) => {
@@ -86,42 +97,41 @@ const EventListScreen = ({ navigation }) => {
     return 'Próximo';
   };
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>Cargando eventos...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Surface style={styles.searchContainer}>
-        <Searchbar
-          placeholder="Buscar evento por nombre..."
-          value={search}
-          onChangeText={setSearch}
-          onSubmitEditing={() => fetchEvents(search)}
-          style={styles.searchBar}
-          iconColor={theme.colors.primary}
-          inputStyle={{ color: theme.colors.text }}
-        />
-      </Surface>
-
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {loading ? (
-          <Text style={styles.loadingText}>Cargando eventos...</Text>
-        ) : events.length === 0 ? (
+        <Surface style={styles.header}>
+          <Title style={styles.title}>Mis Eventos</Title>
+          <Paragraph style={styles.subtitle}>
+            Gestiona los eventos que has creado
+          </Paragraph>
+        </Surface>
+
+        {events.length === 0 ? (
           <Surface style={styles.emptyState}>
             <Text style={styles.emptyStateText}>
-              {search ? 'No se encontraron eventos con ese nombre' : 'No hay eventos disponibles'}
+              No has creado ningún evento aún
             </Text>
-            {!search && (
-              <Button 
-                mode="contained" 
-                onPress={() => navigation.navigate('EventForm')}
-                style={styles.createButton}
-              >
-                Crear el primer evento
-              </Button>
-            )}
+            <Button 
+              mode="contained" 
+              onPress={() => navigation.navigate('EventForm')}
+              style={styles.createButton}
+            >
+              Crear mi primer evento
+            </Button>
           </Surface>
         ) : (
           <View style={styles.eventsContainer}>
@@ -156,29 +166,32 @@ const EventListScreen = ({ navigation }) => {
                     <Text style={styles.eventDetail}>
                       👥 {event.max_assistance} personas
                     </Text>
-                    {event.event_location && (
-                      <Text style={styles.eventDetail}>
-                        📍 {event.event_location.location.name}
-                      </Text>
-                    )}
                   </View>
                   
                   <View style={styles.eventActions}>
                     <Button 
                       mode="outlined" 
-                      onPress={() => navigation.navigate('EventDetail', { eventId: event.id })}
+                      onPress={() => handleEditEvent(event)}
+                      style={styles.actionButton}
+                      textColor={theme.colors.primary}
+                    >
+                      Editar
+                    </Button>
+                    <Button 
+                      mode="outlined" 
+                      onPress={() => handleViewParticipants(event)}
                       style={styles.actionButton}
                       textColor={theme.colors.info}
                     >
-                      Ver detalles
+                      Ver participantes
                     </Button>
                     <Button 
-                      mode="contained" 
-                      onPress={() => handleEnroll(event)}
-                      style={styles.enrollButton}
-                      disabled={new Date(event.start_date) <= new Date()}
+                      mode="outlined" 
+                      onPress={() => handleDeleteEvent(event)}
+                      style={styles.actionButton}
+                      textColor={theme.colors.error}
                     >
-                      Inscribirme
+                      Eliminar
                     </Button>
                   </View>
                 </Card.Content>
@@ -192,7 +205,7 @@ const EventListScreen = ({ navigation }) => {
         icon="plus"
         style={styles.fab}
         onPress={() => navigation.navigate('EventForm')}
-        label="Crear evento"
+        label="Crear Evento"
       />
     </View>
   );
@@ -203,18 +216,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  searchContainer: {
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.surface,
-    ...theme.shadows.sm,
-  },
-  searchBar: {
-    backgroundColor: theme.colors.surfaceLight,
-    borderRadius: theme.borderRadius.lg,
-  },
   scrollContent: {
     padding: theme.spacing.lg,
     paddingBottom: theme.spacing.xxl,
+  },
+  header: {
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.lg,
+    backgroundColor: theme.colors.surface,
+    marginBottom: theme.spacing.lg,
+    alignItems: 'center',
+    ...theme.shadows.md,
+  },
+  title: {
+    color: theme.colors.text,
+    fontWeight: 'bold',
+    marginBottom: theme.spacing.sm,
+  },
+  subtitle: {
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
   },
   loadingText: {
     color: theme.colors.text,
@@ -227,7 +248,6 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.lg,
     backgroundColor: theme.colors.surface,
     alignItems: 'center',
-    marginTop: theme.spacing.xl,
     ...theme.shadows.md,
   },
   emptyStateText: {
@@ -281,11 +301,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: theme.spacing.xs,
   },
-  enrollButton: {
-    backgroundColor: theme.colors.success,
-    flex: 1,
-    marginHorizontal: theme.spacing.xs,
-  },
   fab: {
     position: 'absolute',
     margin: theme.spacing.md,
@@ -295,4 +310,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EventListScreen;
+export default MyEventsScreen;

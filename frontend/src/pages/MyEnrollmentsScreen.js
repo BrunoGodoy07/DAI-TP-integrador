@@ -1,32 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl, Alert } from 'react-native';
-import { Searchbar, FAB, Text, Surface, Card, Title, Paragraph, Button, Chip } from 'react-native-paper';
-import { getAllEvents, searchEvents, enrollInEvent } from '../utils/events';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
+import { Text, Surface, Card, Title, Paragraph, Button, FAB, Chip } from 'react-native-paper';
+import { getAllEvents, unenrollFromEvent } from '../utils/events';
 import { isAuthenticated } from '../utils/auth';
 import theme from '../utils/theme';
 
-const EventListScreen = ({ navigation }) => {
-  const [events, setEvents] = useState([]);
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
+const MyEnrollmentsScreen = ({ navigation }) => {
+  const [enrolledEvents, setEnrolledEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchEvents = async (query = '') => {
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigation.replace('Login');
+      return;
+    }
+    loadEnrolledEvents();
+  }, []);
+
+  const loadEnrolledEvents = async () => {
     try {
       setLoading(true);
-      let response;
-      
-      if (query.trim()) {
-        // Buscar eventos con filtros
-        response = await searchEvents({ name: query });
-      } else {
-        // Obtener todos los eventos
-        response = await getAllEvents(1, 50);
-      }
-      
-      setEvents(response.data || []);
+      // Por ahora cargamos todos los eventos, pero en el backend se debería filtrar
+      // solo los eventos en los que el usuario está inscrito
+      const response = await getAllEvents(1, 100);
+      // Aquí se debería filtrar por eventos inscritos
+      setEnrolledEvents(response.data || []);
     } catch (error) {
-      Alert.alert('Error', 'No se pudieron cargar los eventos');
+      Alert.alert('Error', 'No se pudieron cargar las inscripciones');
     } finally {
       setLoading(false);
     }
@@ -34,27 +35,35 @@ const EventListScreen = ({ navigation }) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchEvents(search);
+    await loadEnrolledEvents();
     setRefreshing(false);
   };
 
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      navigation.replace('Login');
-      return;
-    }
-    fetchEvents();
-  }, []);
+  const handleUnenroll = (event) => {
+    Alert.alert(
+      'Confirmar desinscripción',
+      `¿Estás seguro de que quieres desinscribirte del evento "${event.name}"?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Desinscribirme',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await unenrollFromEvent(event.id);
+              Alert.alert('Éxito', 'Te has desinscrito del evento correctamente');
+              loadEnrolledEvents();
+            } catch (error) {
+              Alert.alert('Error', error.message || 'No se pudo desinscribir del evento');
+            }
+          },
+        },
+      ]
+    );
+  };
 
-  const handleEnroll = async (event) => {
-    try {
-      await enrollInEvent(event.id);
-      Alert.alert('Éxito', 'Te has inscrito al evento correctamente');
-      // Recargar eventos para actualizar el estado
-      fetchEvents(search);
-    } catch (error) {
-      Alert.alert('Error', error.message || 'No se pudo inscribir al evento');
-    }
+  const handleViewEventDetails = (event) => {
+    navigation.navigate('EventDetail', { eventId: event.id });
   };
 
   const formatDate = (dateString) => {
@@ -86,46 +95,45 @@ const EventListScreen = ({ navigation }) => {
     return 'Próximo';
   };
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>Cargando inscripciones...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Surface style={styles.searchContainer}>
-        <Searchbar
-          placeholder="Buscar evento por nombre..."
-          value={search}
-          onChangeText={setSearch}
-          onSubmitEditing={() => fetchEvents(search)}
-          style={styles.searchBar}
-          iconColor={theme.colors.primary}
-          inputStyle={{ color: theme.colors.text }}
-        />
-      </Surface>
-
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {loading ? (
-          <Text style={styles.loadingText}>Cargando eventos...</Text>
-        ) : events.length === 0 ? (
+        <Surface style={styles.header}>
+          <Title style={styles.title}>Mis Inscripciones</Title>
+          <Paragraph style={styles.subtitle}>
+            Eventos en los que estás registrado
+          </Paragraph>
+        </Surface>
+
+        {enrolledEvents.length === 0 ? (
           <Surface style={styles.emptyState}>
             <Text style={styles.emptyStateText}>
-              {search ? 'No se encontraron eventos con ese nombre' : 'No hay eventos disponibles'}
+              No estás inscrito en ningún evento
             </Text>
-            {!search && (
-              <Button 
-                mode="contained" 
-                onPress={() => navigation.navigate('EventForm')}
-                style={styles.createButton}
-              >
-                Crear el primer evento
-              </Button>
-            )}
+            <Button 
+              mode="contained" 
+              onPress={() => navigation.navigate('EventList')}
+              style={styles.exploreButton}
+            >
+              Explorar eventos
+            </Button>
           </Surface>
         ) : (
           <View style={styles.eventsContainer}>
-            {events.map((event) => (
+            {enrolledEvents.map((event) => (
               <Card key={event.id} style={styles.eventCard}>
                 <Card.Content>
                   <View style={styles.eventHeader}>
@@ -166,19 +174,19 @@ const EventListScreen = ({ navigation }) => {
                   <View style={styles.eventActions}>
                     <Button 
                       mode="outlined" 
-                      onPress={() => navigation.navigate('EventDetail', { eventId: event.id })}
+                      onPress={() => handleViewEventDetails(event)}
                       style={styles.actionButton}
                       textColor={theme.colors.info}
                     >
                       Ver detalles
                     </Button>
                     <Button 
-                      mode="contained" 
-                      onPress={() => handleEnroll(event)}
-                      style={styles.enrollButton}
-                      disabled={new Date(event.start_date) <= new Date()}
+                      mode="outlined" 
+                      onPress={() => handleUnenroll(event)}
+                      style={styles.actionButton}
+                      textColor={theme.colors.error}
                     >
-                      Inscribirme
+                      Desinscribirme
                     </Button>
                   </View>
                 </Card.Content>
@@ -189,10 +197,10 @@ const EventListScreen = ({ navigation }) => {
       </ScrollView>
 
       <FAB
-        icon="plus"
+        icon="search"
         style={styles.fab}
-        onPress={() => navigation.navigate('EventForm')}
-        label="Crear evento"
+        onPress={() => navigation.navigate('EventList')}
+        label="Explorar eventos"
       />
     </View>
   );
@@ -203,18 +211,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  searchContainer: {
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.surface,
-    ...theme.shadows.sm,
-  },
-  searchBar: {
-    backgroundColor: theme.colors.surfaceLight,
-    borderRadius: theme.borderRadius.lg,
-  },
   scrollContent: {
     padding: theme.spacing.lg,
     paddingBottom: theme.spacing.xxl,
+  },
+  header: {
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.lg,
+    backgroundColor: theme.colors.surface,
+    marginBottom: theme.spacing.lg,
+    alignItems: 'center',
+    ...theme.shadows.md,
+  },
+  title: {
+    color: theme.colors.text,
+    fontWeight: 'bold',
+    marginBottom: theme.spacing.sm,
+  },
+  subtitle: {
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
   },
   loadingText: {
     color: theme.colors.text,
@@ -227,7 +243,6 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.lg,
     backgroundColor: theme.colors.surface,
     alignItems: 'center',
-    marginTop: theme.spacing.xl,
     ...theme.shadows.md,
   },
   emptyStateText: {
@@ -236,7 +251,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
     fontSize: 16,
   },
-  createButton: {
+  exploreButton: {
     backgroundColor: theme.colors.primary,
   },
   eventsContainer: {
@@ -281,18 +296,13 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: theme.spacing.xs,
   },
-  enrollButton: {
-    backgroundColor: theme.colors.success,
-    flex: 1,
-    marginHorizontal: theme.spacing.xs,
-  },
   fab: {
     position: 'absolute',
     margin: theme.spacing.md,
     right: 0,
     bottom: 0,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.info,
   },
 });
 
-export default EventListScreen;
+export default MyEnrollmentsScreen;
