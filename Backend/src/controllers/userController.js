@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import userService from './../services/userService.js';
 import jwt from 'jsonwebtoken';
-import JWT_SECRET from '../configs/JWTConfig.js';
+import DBConfig from '../configs/DBConfig.js';
 
 const router = Router();
 const svc = new userService();
@@ -42,7 +42,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign(
         { id: user.id, username: user.username },
-        JWT_SECRET,
+        DBConfig.JWT_SECRET,
         { expiresIn: "1h" }
     );
     return res.status(200).json({ success: true, message: "Inicio de sesión correcto.", token });

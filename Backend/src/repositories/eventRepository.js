@@ -1,7 +1,6 @@
 import DBConfig from './../configs/DBConfig.js';
 import pkg from 'pg'
 const { Client, Pool }  = pkg;
-import JWT_SECRET from '../configs/JWTConfig.js';
 import jwt from 'jsonwebtoken';
 
 export default class eventRepository {
@@ -381,7 +380,7 @@ export default class eventRepository {
             if (!authHeader) throw new Error("Authorization header missing");
             const token = authHeader.split(' ')[1];
             if (!token) throw new Error("Token missing");
-            const decoded = jwt.verify(token, JWT_SECRET);
+            const decoded = jwt.verify(token, DBConfig.JWT_SECRET);
             const user_id = decoded.id; // Cambiado de user_id a id según el token generado
             
             await client.connect();

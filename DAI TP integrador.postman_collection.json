@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "144bac7d-e985-48fe-9e75-73dc8de77b56",
+		"_postman_id": "831d32b1-6730-4045-879d-53fd946b270a",
 		"name": "DAI TP integrador",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -121,36 +121,6 @@
 			"response": []
 		},
 		{
-			"name": "Event - Enroll user",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "Bearer {{jwt}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{baseUrl}}/api/event/1/enrollment",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"api",
-						"event",
-						"1",
-						"enrollment"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Event - Update (PUT)",
 			"request": {
 				"method": "PUT",
@@ -170,14 +140,14 @@
 					"raw": "{\n  \"name\": \"Concierto Demo Actualizado\",\n  \"description\": \"Descripción actualizada del evento\",\n  \"id_event_location\": 1,\n  \"start_date\": \"2025-09-02\",\n  \"duration_in_minutes\": 140,\n  \"price\": 1200,\n  \"enabled_for_enrollment\": 1,\n  \"max_assistance\": 4500\n}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/api/event/1",
+					"raw": "{{baseUrl}}/api/event/6",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
 						"event",
-						"1"
+						"6"
 					]
 				}
 			},
@@ -195,14 +165,14 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/api/event/1",
+					"raw": "{{baseUrl}}/api/event/5",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
 						"event",
-						"1"
+						"5"
 					]
 				}
 			},
@@ -289,6 +259,62 @@
 			"response": []
 		},
 		{
+			"name": "Event - Enroll user",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/event/1/enrollment",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"event",
+						"1",
+						"enrollment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Event - Delete Enrollment (remove authenticated user from event)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/event/1/enrollment",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"event",
+						"1",
+						"enrollment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Event-location - List",
 			"request": {
 				"method": "GET",
@@ -334,14 +360,14 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/api/event-location/1",
+					"raw": "{{baseUrl}}/api/event-location/2",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
 						"event-location",
-						"1"
+						"2"
 					]
 				}
 			},
@@ -413,10 +439,14 @@
 			"response": []
 		},
 		{
-			"name": "Event - Delete Enrollment (remove authenticated user from event)",
+			"name": "Event-location - Delete",
 			"request": {
 				"method": "DELETE",
 				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
 					{
 						"key": "Authorization",
 						"value": "Bearer {{jwt}}",
@@ -424,15 +454,14 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/api/event/1/enrollment",
+					"raw": "{{baseUrl}}/api/event-location/6",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
-						"event",
-						"1",
-						"enrollment"
+						"event-location",
+						"6"
 					]
 				}
 			},
@@ -444,7 +473,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJ0aXppYW5hZW1hdHRpb2RhQGV4YW1wbGUuY29tIiwiaWF0IjoxNzU1ODczNDYzLCJleHAiOjE3NTU4NzcwNjN9.fTT3uNaAaIosEbctGe8KmHcBROtTXWHo4QbCkHzBygk",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJ0aXppYW5hZW1hdHRpb2RhQGV4YW1wbGUuY29tIiwiaWF0IjoxNzU2MTIwNTQzLCJleHAiOjE3NTYxMjQxNDN9.pN7AYhDPEWfTTYG9XE_eOMYJioDmYNbkaGL8eAViB5w",
 				"type": "string"
 			}
 		]
