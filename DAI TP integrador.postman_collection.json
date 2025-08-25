@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "831d32b1-6730-4045-879d-53fd946b270a",
+		"_postman_id": "90cc6b75-cd4a-431f-aea3-e1738ad6dcdb",
 		"name": "DAI TP integrador",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -165,14 +165,14 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/api/event/5",
+					"raw": "{{baseUrl}}/api/event/9",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
 						"event",
-						"5"
+						"9"
 					]
 				}
 			},
@@ -274,14 +274,14 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "{{baseUrl}}/api/event/1/enrollment",
+					"raw": "{{baseUrl}}/api/event/8/enrollment",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
 						"event",
-						"1",
+						"8",
 						"enrollment"
 					]
 				}
@@ -300,14 +300,14 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/api/event/1/enrollment",
+					"raw": "{{baseUrl}}/api/event/8/enrollment",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
 						"event",
-						"1",
+						"8",
 						"enrollment"
 					]
 				}
@@ -444,7 +444,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJ0aXppYW5hZW1hdHRpb2RhQGV4YW1wbGUuY29tIiwiaWF0IjoxNzU2MTI2NjEwLCJleHAiOjE3NTYxMzAyMTB9.BfgobasylR4UPhfmeqgaxarv5E9xbz3Dm2R7vWpBzok",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlcm5hbWUiOiJ0aXppYW5hZW1hdHRpb2RhQGV4YW1wbGUuY29tIiwiaWF0IjoxNzU2MTI4MDgzLCJleHAiOjE3NTYxMzE2ODN9.VWNDtYmzxoW1Yk2NgF9LsHXq-3DlgmEpexWNq9nGirM",
 				"type": "string"
 			}
 		]
