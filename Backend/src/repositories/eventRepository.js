@@ -49,11 +49,11 @@ export default class eventRepository {
                         'last_name', u.last_name
                     )
                 ) AS event
-                FROM public.events e
-                INNER JOIN public.users u ON e.id_creator_user = u.id
-                INNER JOIN public.event_locations el ON e.id_event_location = el.id
-                INNER JOIN public.locations l ON el.id_location = l.id
-                INNER JOIN public.provinces p ON l.id_province = p.id
+                FROM events e
+                INNER JOIN users u ON e.id_creator_user = u.id
+                INNER JOIN event_locations el ON e.id_event_location = el.id
+                INNER JOIN locations l ON el.id_location = l.id
+                INNER JOIN provinces p ON l.id_province = p.id
             `;
             const result = await client.query(sql);
             await client.end();
@@ -70,7 +70,7 @@ export default class eventRepository {
         try {
             await client.connect();
             const sql = `
-                SELECT max_capacity FROM public.event_locations WHERE id = $1
+                SELECT max_capacity FROM event_locations WHERE id = $1
             `;
             const result = await client.query(sql, [id]);
             await client.end();
@@ -90,7 +90,7 @@ export default class eventRepository {
         try {
             await client.connect();
             const sql = `
-                SELECT id_creator_user FROM public.events WHERE id = $1
+                SELECT id_creator_user FROM events WHERE id = $1
             `;
             const result = await client.query(sql, [id]);
             await client.end();
@@ -108,7 +108,7 @@ export default class eventRepository {
         const client = new Client(DBConfig);
         try {
             const sql = `
-                INSERT INTO public.events (name, description, id_event_location, start_date, duration_in_minutes, price, enabled_for_enrollment, max_assistance, id_creator_user)
+                INSERT INTO events (name, description, id_event_location, start_date, duration_in_minutes, price, enabled_for_enrollment, max_assistance, id_creator_user)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                 RETURNING *
             `
@@ -139,7 +139,7 @@ export default class eventRepository {
         const client = new Client(DBConfig);
         try {
             const sql = `
-                UPDATE public.events
+                UPDATE events
                 SET name = $1, description = $2, id_event_location = $3, start_date = $4, duration_in_minutes = $5, price = $6, enabled_for_enrollment = $7, max_assistance = $8
                 WHERE id = $9
                 RETURNING *
@@ -172,7 +172,7 @@ export default class eventRepository {
         try {
             // Primero obtener el evento antes de eliminarlo
             const getSql = `
-                SELECT * FROM public.events WHERE id = $1
+                SELECT * FROM events WHERE id = $1
             `;
             
             await client.connect();
@@ -187,7 +187,7 @@ export default class eventRepository {
             
             // Luego eliminar el evento
             const deleteSql = `
-                DELETE FROM public.events
+                DELETE FROM events
                 WHERE id = $1
             `;
             
@@ -209,7 +209,7 @@ export default class eventRepository {
             await client.connect();
             const sql = `
                 SELECT COUNT(*) as count
-                FROM public.event_enrollments
+                FROM event_enrollments
                 WHERE id_event = $1
             `;
             const result = await client.query(sql, [id]);
@@ -277,11 +277,11 @@ export default class eventRepository {
                     'last_name', u.last_name
                 )
             ) AS event
-                            FROM public.events e
-                INNER JOIN public.users u ON e.id_creator_user = u.id
-                INNER JOIN public.event_locations el ON e.id_event_location = el.id
-                INNER JOIN public.locations l ON el.id_location = l.id
-                INNER JOIN public.provinces p ON l.id_province = p.id
+                FROM events e
+                INNER JOIN users u ON e.id_creator_user = u.id
+                INNER JOIN event_locations el ON e.id_event_location = el.id
+                INNER JOIN locations l ON el.id_location = l.id
+                INNER JOIN provinces p ON l.id_province = p.id
             ${whereClause}
         `;
     
@@ -351,11 +351,11 @@ export default class eventRepository {
                         'password', u.password
                     )
                 ) AS event
-                FROM public.events e
-                INNER JOIN public.users u ON e.id_creator_user = u.id
-                INNER JOIN public.event_locations el ON e.id_event_location = el.id
-                INNER JOIN public.locations l ON el.id_location = l.id
-                INNER JOIN public.provinces p ON l.id_province = p.id
+                FROM events e
+                INNER JOIN users u ON e.id_creator_user = u.id
+                INNER JOIN event_locations el ON e.id_event_location = el.id
+                INNER JOIN locations l ON el.id_location = l.id
+                INNER JOIN provinces p ON l.id_province = p.id
                 WHERE e.id = $1
             `;
     
@@ -387,7 +387,7 @@ export default class eventRepository {
             await client.connect();
             const eventQuery = `
                 SELECT *
-                FROM public.events
+                FROM events
                 WHERE id = $1
             `
             const eventResult = await client.query(eventQuery, [id]);
@@ -400,14 +400,14 @@ export default class eventRepository {
             {
                 const dateTime = new Date();
                 const enrollmentUserQuery = `
-                    INSERT INTO public.event_enrollments (id_event, id_user, registration_date_time)
+                    INSERT INTO event_enrollments (id_event, id_user, registration_date_time)
                     values ($1, $2, $3)
                 `
 
                 await client.query(enrollmentUserQuery, [id, user_id, dateTime])
                 const enrollmentCountQuery = `
                     SELECT COUNT(*)
-                    FROM public.event_enrollments
+                    FROM event_enrollments
                     WHERE id_event = $1
                 `
 
@@ -418,7 +418,7 @@ export default class eventRepository {
                 if (enrolledCount >= eventResult.rows[0].max_assistance)
                 {
                                     const updateQuery = `
-                UPDATE public.events
+                UPDATE events
                 SET enabled_for_enrollment = false
                 WHERE id = $1
                 `
