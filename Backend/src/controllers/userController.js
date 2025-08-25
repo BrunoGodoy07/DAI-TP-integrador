@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import userService from './../services/userService.js';
 import jwt from 'jsonwebtoken';
+import JWT_SECRET from '../configs/JWTConfig.js';
 
 const router = Router();
 const svc = new userService();
@@ -32,7 +33,7 @@ router.post('/login', async (req, res) => {
     if (!user) {
         return res.status(401).json({ success: false, message: "El usuario ingresado no existe.", token: "" });
     }
-    if (!user.password === password) {
+    if (user.password !== password) {
         return res.status(401).json({ success: false, message: "La clave es invalida.", token: "" });
     } 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username)) {
@@ -41,7 +42,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign(
         { id: user.id, username: user.username },
-        process.env.JWT_SECRET,
+        JWT_SECRET,
         { expiresIn: "1h" }
     );
     return res.status(200).json({ success: true, message: "Inicio de sesión correcto.", token });

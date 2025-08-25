@@ -33,10 +33,23 @@ router.post('', authMiddleware, async (req, res) => {
     try {
         let insertContents = req.body;
         insertContents.creator_user = req.user.id;
+        
+        // Validaciones según especificaciones
+        if (!insertContents.name || insertContents.name.length < 3) {
+            return res.status(400).json({ success: false, error: "El nombre debe tener al menos 3 letras." });
+        }
+        if (!insertContents.description || insertContents.description.length < 3) {
+            return res.status(400).json({ success: false, error: "La descripción debe tener al menos 3 letras." });
+        }
+        
         const max_capacity = await svc.getCapacity(insertContents.id_event_location);
-        if(insertContents.name < 3 || insertContents.description < 3) throw new Error("El nombre y la descripción tienen que tener más de 3 letras.");
-        else if(insertContents.max_assistance > max_capacity) throw new Error("La asistencia máxima no puede ser mayor a la capacidad de la ubicación.");
-        else if(insertContents.price < 0 || insertContents.duration_in_minutes < 0) throw new Error("El precio o la duración no pueden ser negativos.");
+        if (insertContents.max_assistance > max_capacity) {
+            return res.status(400).json({ success: false, error: "La asistencia máxima no puede ser mayor a la capacidad de la ubicación." });
+        }
+        if (insertContents.price < 0 || insertContents.duration_in_minutes < 0) {
+            return res.status(400).json({ success: false, error: "El precio o la duración no pueden ser negativos." });
+        }
+        
         const inserted = await svc.createEvent(insertContents);
         res.status(201).json({ success: true, inserted });
     } catch (err) {
@@ -44,18 +57,43 @@ router.post('', authMiddleware, async (req, res) => {
     }
 });
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('', authMiddleware, async (req, res) => {
     try {
         let insertContents = req.body;
-        const id = parseInt(req.params.id);
-        const creatorUser = svc.getCreator(id); //Acá ya tira error si el evento no existe
-        if(creatorUser != req.user.id) throw new Error("Acceso no autorizado.");
-        const max_capacity = await svc.getCapacity(insertContents.id_event_location);
-        if(insertContents.name < 3 || insertContents.description < 3) throw new Error("El nombre y la descripción tienen que tener más de 3 letras.");
-        else if(insertContents.max_assistance > max_capacity) throw new Error("La asistencia máxima no puede ser mayor a la capacidad de la ubicación.");
-        else if(insertContents.price < 0 || insertContents.duration_in_minutes < 0) throw new Error("El precio o la duración no pueden ser negativos.");
-        const inserted = await svc.updateEvent(insertContents, id);
-        res.status(201).json({ success: true, inserted });
+        
+        if (!insertContents.id) {
+            return res.status(400).json({ success: false, error: "El ID del evento es requerido." });
+        }
+        
+        // Verificar que el evento existe y pertenece al usuario autenticado
+        const creatorUser = await svc.getCreator(insertContents.id);
+        if (!creatorUser) {
+            return res.status(404).json({ success: false, error: "Evento no encontrado." });
+        }
+        if (creatorUser != req.user.id) {
+            return res.status(404).json({ success: false, error: "Acceso no autorizado." });
+        }
+        
+        // Validaciones según especificaciones
+        if (insertContents.name && insertContents.name.length < 3) {
+            return res.status(400).json({ success: false, error: "El nombre debe tener al menos 3 letras." });
+        }
+        if (insertContents.description && insertContents.description.length < 3) {
+            return res.status(400).json({ success: false, error: "La descripción debe tener al menos 3 letras." });
+        }
+        
+        if (insertContents.id_event_location) {
+            const max_capacity = await svc.getCapacity(insertContents.id_event_location);
+            if (insertContents.max_assistance > max_capacity) {
+                return res.status(400).json({ success: false, error: "La asistencia máxima no puede ser mayor a la capacidad de la ubicación." });
+            }
+        }
+        if (insertContents.price < 0 || insertContents.duration_in_minutes < 0) {
+            return res.status(400).json({ success: false, error: "El precio o la duración no pueden ser negativos." });
+        }
+        
+        const inserted = await svc.updateEvent(insertContents, insertContents.id);
+        res.status(200).json({ success: true, inserted });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
@@ -64,10 +102,24 @@ router.put('/:id', authMiddleware, async (req, res) => {
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const creatorUser = svc.getCreator(id); //Acá ya tira error si el evento no existe
-        if(creatorUser != req.user.id) throw new Error("Acceso no autorizado.");
-        const inserted = await svc.deleteEvent(id); //Si existe una foreign key (o sea, un usuario registrado al evento) tira error acá
-        res.status(201).json({ success: true, inserted });
+        
+        // Verificar que el evento existe y pertenece al usuario autenticado
+        const creatorUser = await svc.getCreator(id);
+        if (!creatorUser) {
+            return res.status(404).json({ success: false, error: "Evento no encontrado." });
+        }
+        if (creatorUser != req.user.id) {
+            return res.status(404).json({ success: false, error: "Acceso no autorizado." });
+        }
+        
+        // Verificar si hay usuarios registrados al evento
+        const hasEnrollments = await svc.checkEventEnrollments(id);
+        if (hasEnrollments) {
+            return res.status(400).json({ success: false, error: "No se puede eliminar el evento porque tiene usuarios registrados." });
+        }
+        
+        const deleted = await svc.deleteEvent(id);
+        res.status(200).json({ success: true, deleted });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }

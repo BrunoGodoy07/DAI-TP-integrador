@@ -32,7 +32,7 @@ export default class eventLocationRepository {
     if (hasCreator) {
       const sql = `
         SELECT id, id_location, name, full_address, max_capacity, latitude, longitude, id_creator_user
-        FROM event_locations
+        FROM public.event_locations
         WHERE id_creator_user = $1
         ORDER BY id
         LIMIT $2 OFFSET $3
@@ -43,7 +43,7 @@ export default class eventLocationRepository {
       // No owner column: return all event_locations (no per-user filtering possible)
       const sql = `
         SELECT id, id_location, name, full_address, max_capacity, latitude, longitude
-        FROM event_locations
+        FROM public.event_locations
         ORDER BY id
         LIMIT $1 OFFSET $2
       `;
@@ -57,7 +57,7 @@ export default class eventLocationRepository {
     if (hasCreator) {
       const sql = `
         SELECT id, id_location, name, full_address, max_capacity, latitude, longitude, id_creator_user
-        FROM event_locations
+        FROM public.event_locations
         WHERE id = $1 AND id_creator_user = $2
       `;
       const { rows } = await pool.query(sql, [id, userId]);
@@ -65,7 +65,7 @@ export default class eventLocationRepository {
     } else {
       const sql = `
         SELECT id, id_location, name, full_address, max_capacity, latitude, longitude
-        FROM event_locations
+        FROM public.event_locations
         WHERE id = $1
       `;
       const { rows } = await pool.query(sql, [id]);
@@ -77,7 +77,7 @@ export default class eventLocationRepository {
     const { id_location, name, full_address, max_capacity, latitude = 0, longitude = 0 } = payload;
 
     // Validate referenced location exists
-    const locRes = await pool.query('SELECT id FROM locations WHERE id = $1', [id_location]);
+    const locRes = await pool.query('SELECT id FROM public.locations WHERE id = $1', [id_location]);
     if (locRes.rowCount === 0) {
       const err = new Error('id_location no existe');
       err.code = 'INVALID_LOCATION';
@@ -88,7 +88,7 @@ export default class eventLocationRepository {
 
     if (hasCreator) {
       const sql = `
-        INSERT INTO event_locations (id_location, name, full_address, max_capacity, latitude, longitude, id_creator_user)
+        INSERT INTO public.event_locations (id_location, name, full_address, max_capacity, latitude, longitude, id_creator_user)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING id, id_location, name, full_address, max_capacity, latitude, longitude, id_creator_user
       `;
@@ -98,7 +98,7 @@ export default class eventLocationRepository {
     } else {
       // Table doesn't store creator — insert without owner
       const sql = `
-        INSERT INTO event_locations (id_location, name, full_address, max_capacity, latitude, longitude)
+        INSERT INTO public.event_locations (id_location, name, full_address, max_capacity, latitude, longitude)
         VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING id, id_location, name, full_address, max_capacity, latitude, longitude
       `;
@@ -134,7 +134,7 @@ export default class eventLocationRepository {
 
     // If id_location is being changed, validate it exists
     if (Object.prototype.hasOwnProperty.call(fields, 'id_location')) {
-      const locRes = await pool.query('SELECT id FROM locations WHERE id = $1', [fields.id_location]);
+      const locRes = await pool.query('SELECT id FROM public.locations WHERE id = $1', [fields.id_location]);
       if (locRes.rowCount === 0) {
         const err = new Error('id_location no existe');
         err.code = 'INVALID_LOCATION';
@@ -146,7 +146,7 @@ export default class eventLocationRepository {
 
     if (hasCreator) {
       const sql = `
-        UPDATE event_locations
+        UPDATE public.event_locations
         SET ${sets.join(', ')}
         WHERE id = $${idx} AND id_creator_user = $${idx + 1}
         RETURNING id, id_location, name, full_address, max_capacity, latitude, longitude, id_creator_user
@@ -156,13 +156,39 @@ export default class eventLocationRepository {
       return rows[0];
     } else {
       const sql = `
-        UPDATE event_locations
+        UPDATE public.event_locations
         SET ${sets.join(', ')}
         WHERE id = $${idx}
         RETURNING id, id_location, name, full_address, max_capacity, latitude, longitude
       `;
       params.push(id);
       const { rows } = await pool.query(sql, params);
+      return rows[0];
+    }
+  }
+
+  async delete(id, userId) {
+    // Check existence and ownership if possible
+    const existing = await this.getByIdAndUser(id, userId);
+    if (!existing) return null;
+
+    const hasCreator = await this._detectCreatorColumn();
+
+    if (hasCreator) {
+      const sql = `
+        DELETE FROM public.event_locations
+        WHERE id = $1 AND id_creator_user = $2
+        RETURNING id, id_location, name, full_address, max_capacity, latitude, longitude, id_creator_user
+      `;
+      const { rows } = await pool.query(sql, [id, userId]);
+      return rows[0];
+    } else {
+      const sql = `
+        DELETE FROM public.event_locations
+        WHERE id = $1
+        RETURNING id, id_location, name, full_address, max_capacity, latitude, longitude
+      `;
+      const { rows } = await pool.query(sql, [id]);
       return rows[0];
     }
   }
