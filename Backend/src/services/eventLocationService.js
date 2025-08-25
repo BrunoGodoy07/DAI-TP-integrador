@@ -73,9 +73,4 @@ export default class eventLocationService {
     const updated = await repo.update(id, userId, fields);
     return updated;
   }
-
-  async delete(userId, id) {
-    const deleted = await repo.delete(id, userId);
-    return deleted;
-  }
 }

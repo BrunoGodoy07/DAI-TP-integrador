@@ -74,23 +74,5 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/event-location/:id
-router.delete('/:id', async (req, res) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    if (Number.isNaN(id)) return res.status(400).json({ error: 'Id inválida.' });
-
-    const userId = req.user?.id;
-    const deleted = await svc.delete(userId, id);
-    if (deleted === null) return res.status(404).json({ error: 'Not found' });
-    return res.status(200).json(deleted);
-  } catch (err) {
-    console.error(err);
-    if (err.code && err.code.startsWith('INVALID')) {
-      return res.status(400).json({ error: err.message });
-    }
-    return res.status(500).json({ error: 'Error interno.' });
-  }
-});
 
 export default router;
