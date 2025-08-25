@@ -57,16 +57,17 @@ router.post('', authMiddleware, async (req, res) => {
     }
 });
 
-router.put('', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
     try {
-        let insertContents = req.body;
-        
-        if (!insertContents.id) {
-            return res.status(400).json({ success: false, error: "El ID del evento es requerido." });
+        const eventId = parseInt(req.params.id);
+        if (!eventId) {
+            return res.status(400).json({ success: false, error: "ID del evento no válido." });
         }
         
+        let updateContents = req.body;
+        
         // Verificar que el evento existe y pertenece al usuario autenticado
-        const creatorUser = await svc.getCreator(insertContents.id);
+        const creatorUser = await svc.getCreator(eventId);
         if (!creatorUser) {
             return res.status(404).json({ success: false, error: "Evento no encontrado." });
         }
@@ -75,25 +76,25 @@ router.put('', authMiddleware, async (req, res) => {
         }
         
         // Validaciones según especificaciones
-        if (insertContents.name && insertContents.name.length < 3) {
+        if (updateContents.name && updateContents.name.length < 3) {
             return res.status(400).json({ success: false, error: "El nombre debe tener al menos 3 letras." });
         }
-        if (insertContents.description && insertContents.description.length < 3) {
+        if (updateContents.description && updateContents.description.length < 3) {
             return res.status(400).json({ success: false, error: "La descripción debe tener al menos 3 letras." });
         }
         
-        if (insertContents.id_event_location) {
-            const max_capacity = await svc.getCapacity(insertContents.id_event_location);
-            if (insertContents.max_assistance > max_capacity) {
+        if (updateContents.id_event_location) {
+            const max_capacity = await svc.getCapacity(updateContents.id_event_location);
+            if (updateContents.max_assistance > max_capacity) {
                 return res.status(400).json({ success: false, error: "La asistencia máxima no puede ser mayor a la capacidad de la ubicación." });
             }
         }
-        if (insertContents.price < 0 || insertContents.duration_in_minutes < 0) {
+        if (updateContents.price < 0 || updateContents.duration_in_minutes < 0) {
             return res.status(400).json({ success: false, error: "El precio o la duración no pueden ser negativos." });
         }
         
-        const inserted = await svc.updateEvent(insertContents, insertContents.id);
-        res.status(200).json({ success: true, inserted });
+        const updated = await svc.updateEvent(updateContents, eventId);
+        res.status(200).json({ success: true, updated });
     } catch (err) {
         res.status(400).json({ success: false, error: err.message });
     }
