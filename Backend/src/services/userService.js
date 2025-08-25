@@ -10,4 +10,8 @@ export default class UserService {
         const returnArray = await repo.createUser(user);
         return returnArray;
     }
+    deleteUser = async (username) => {
+        const returnArray = await repo.deleteUser(username);
+        return returnArray;
+    }
 }

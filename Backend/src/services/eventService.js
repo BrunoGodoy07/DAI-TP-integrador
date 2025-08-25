@@ -42,8 +42,13 @@ export default class eventService {
     return returnArray;
   }
   
-  enrollUser = async (id) => {
-    const returnArray = await repo.enrollUser(id)
+  enrollUser = async (id, userId) => {
+    const returnArray = await repo.enrollUser(id, userId);
+    return returnArray;
+  }
+
+  unenrollUser = async (id, userId) => {
+    const returnArray = await repo.unenrollUser(id, userId);
     return returnArray;
   }
 

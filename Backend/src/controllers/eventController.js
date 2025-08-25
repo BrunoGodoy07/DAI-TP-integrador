@@ -126,17 +126,109 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 });
 
 router.post('/:id/enrollment/', authMiddleware, async (req, res) => {
-    if (!req.params.id)
-    {
-        res.status(404).send("Id no encontrada.")
-    }
-
     try {
-        const inserted = await svc.enrollUser(parseInt(req.params.id));
-        //ver de agregar las diferentes posibilidades de error.
+        const eventId = parseInt(req.params.id);
+        if (!eventId) {
+            return res.status(404).json({ success: false, error: "ID del evento no válido." });
+        }
+
+        const userId = req.user.id;
+        const enrollment = await svc.enrollUser(eventId, userId);
+        
+        res.status(201).json({ 
+            success: true, 
+            message: "Usuario inscrito correctamente al evento.",
+            enrollment 
+        });
     } catch (err) {
+        console.error('Error en inscripción:', err.message);
+        
+        if (err.message.includes("no encontrado")) {
+            return res.status(404).json({ success: false, error: err.message });
+        }
+        
+        // Manejar específicamente el error de usuario ya inscrito
+        if (err.message.includes("ya está inscrito")) {
+            return res.status(400).json({ 
+                success: false, 
+                error: err.message,
+                code: "USER_ALREADY_ENROLLED"
+            });
+        }
+        
+        // Manejar error de evento no habilitado
+        if (err.message.includes("no está habilitado")) {
+            return res.status(400).json({ 
+                success: false, 
+                error: err.message,
+                code: "EVENT_NOT_ENABLED"
+            });
+        }
+        
+        // Manejar error de capacidad máxima
+        if (err.message.includes("capacidad máxima")) {
+            return res.status(400).json({ 
+                success: false, 
+                error: err.message,
+                code: "EVENT_FULL"
+            });
+        }
+        
+        // Manejar errores de fecha
+        if (err.message.includes("ya pasó") || err.message.includes("es hoy")) {
+            return res.status(400).json({ 
+                success: false, 
+                error: err.message,
+                code: "EVENT_DATE_INVALID"
+            });
+        }
+        
         res.status(400).json({ success: false, error: err.message });
     }
-})
+});
+
+router.delete('/:id/enrollment/', authMiddleware, async (req, res) => {
+    try {
+        const eventId = parseInt(req.params.id);
+        if (!eventId) {
+            return res.status(404).json({ success: false, error: "ID del evento no válido." });
+        }
+
+        const userId = req.user.id;
+        const enrollment = await svc.unenrollUser(eventId, userId);
+        
+        res.status(200).json({ 
+            success: true, 
+            message: "Usuario desinscrito correctamente del evento.",
+            enrollment 
+        });
+    } catch (err) {
+        console.error('Error en desinscripción:', err.message);
+        
+        if (err.message.includes("no encontrado")) {
+            return res.status(404).json({ success: false, error: err.message });
+        }
+        
+        // Manejar específicamente el error de usuario no inscrito
+        if (err.message.includes("no está inscrito")) {
+            return res.status(400).json({ 
+                success: false, 
+                error: err.message,
+                code: "USER_NOT_ENROLLED"
+            });
+        }
+        
+        // Manejar otros errores de validación
+        if (err.message.includes("ya pasó") || err.message.includes("es hoy")) {
+            return res.status(400).json({ 
+                success: false, 
+                error: err.message,
+                code: "EVENT_DATE_INVALID"
+            });
+        }
+        
+        res.status(400).json({ success: false, error: err.message });
+    }
+});
 
 export default router;

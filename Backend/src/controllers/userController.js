@@ -48,4 +48,34 @@ router.post('/login', async (req, res) => {
     return res.status(200).json({ success: true, message: "Inicio de sesión correcto.", token });
 });
 
+// Eliminar usuario
+router.delete('/register', async (req, res) => {
+    try {
+        const { username } = req.body;
+        
+        if (!username) {
+            return res.status(400).json({ success: false, message: "El username es requerido." });
+        }
+        
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(username)) {
+            return res.status(400).json({ success: false, message: "El email es invalido." });
+        }
+        
+        const deletedUser = await svc.deleteUser(username);
+        
+        return res.status(200).json({ 
+            success: true, 
+            message: "Usuario eliminado correctamente.",
+            deletedUser 
+        });
+    } catch (err) {
+        if (err.message.includes("no encontrado")) {
+            return res.status(404).json({ success: false, message: err.message });
+        }
+        return res.status(500).json({ success: false, message: "Error interno del servidor." });
+    }
+});
+
 export default router;

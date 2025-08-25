@@ -33,4 +33,30 @@ export default class userRepository {
             throw err;
         }
     }
+
+    deleteUser = async (username) => {
+        const client = new Client(DBConfig);
+        try {
+            await client.connect();
+            
+            // Primero verificar que el usuario existe
+            const checkUser = await client.query('SELECT * FROM users WHERE username = $1', [username]);
+            if (checkUser.rows.length === 0) {
+                await client.end();
+                throw new Error("Usuario no encontrado");
+            }
+            
+            // Luego eliminar el usuario
+            const result = await client.query(
+                'DELETE FROM users WHERE username = $1 RETURNING *',
+                [username]
+            );
+            await client.end();
+            return result.rows[0];
+        } catch (err) {
+            console.error("error:" + err);
+            await client.end();
+            throw err;
+        }
+    }
 }
