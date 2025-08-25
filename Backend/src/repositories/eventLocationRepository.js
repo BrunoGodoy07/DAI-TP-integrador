@@ -167,29 +167,5 @@ export default class eventLocationRepository {
     }
   }
 
-  async delete(id, userId) {
-    // Check existence and ownership if possible
-    const existing = await this.getByIdAndUser(id, userId);
-    if (!existing) return null;
-
-    const hasCreator = await this._detectCreatorColumn();
-
-    if (hasCreator) {
-      const sql = `
-        DELETE FROM public.event_locations
-        WHERE id = $1 AND id_creator_user = $2
-        RETURNING id, id_location, name, full_address, max_capacity, latitude, longitude, id_creator_user
-      `;
-      const { rows } = await pool.query(sql, [id, userId]);
-      return rows[0];
-    } else {
-      const sql = `
-        DELETE FROM public.event_locations
-        WHERE id = $1
-        RETURNING id, id_location, name, full_address, max_capacity, latitude, longitude
-      `;
-      const { rows } = await pool.query(sql, [id]);
-      return rows[0];
-    }
-  }
+  
 }

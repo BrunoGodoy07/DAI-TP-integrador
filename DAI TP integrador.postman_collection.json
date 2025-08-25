@@ -437,35 +437,6 @@
 				}
 			},
 			"response": []
-		},
-		{
-			"name": "Event-location - Delete",
-			"request": {
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer {{jwt}}",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "{{baseUrl}}/api/event-location/6",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"api",
-						"event-location",
-						"6"
-					]
-				}
-			},
-			"response": []
 		}
 	],
 	"auth": {
